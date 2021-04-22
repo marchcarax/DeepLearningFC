@@ -1,2 +1,4 @@
 # DeepLearningFC
- Project CNN + LSTM DL predictions
+ Project CNN + LSTM DL predictive models
+
+ 
