@@ -18,7 +18,7 @@ def plot_test(date, test_size, y_test, results):
     df.set_index('Date', inplace = True)
     df['predict'] = results
     df['real'] = y_test
-    df.to_csv('train_test_data.csv')
+    df.to_csv('data\\train_test_data.csv')
 
     #Plotting the results
     fig = plt.figure(figsize=(15,8))
@@ -29,16 +29,14 @@ def plot_test(date, test_size, y_test, results):
     ax.set_title('### Accuracy of the predictions:'+ str(100 - (100*(abs(df['real']-df['predict'])/df['real'])).mean().round(2))+'% ###')
     ax.set_xlabel('Time')
     ax.set_ylabel('Price')
-    #why not working?
-    sns.lineplot(data=df, x='Date', y='predict')
     plt.legend()
-    #fig.savefig('figures\\cnn_lstm_train_test.png')
+    fig.savefig('figures\\cnn_lstm_train_test.png')
     plt.show()
 
 def plot_future(future, n):
 
     #Preparing dataframe with test data + forecast
-    df_predict = pd.read_csv('train_test_data.csv')
+    df_predict = pd.read_csv('data\\train_test_data.csv')
     df_predict.set_index('Date', inplace = True)
     future_dates = future_date(df_predict.iloc[-n:,:])
     df = pd.DataFrame(index = future_dates)
@@ -65,6 +63,8 @@ def plot_future(future, n):
     fig.savefig('figures\\cnn_lstm_train_test.png')
     plt.show()
 
+    return df_predict[-n:]
+
 def future_date(df: pd.DataFrame):
     #it creates the Future dates for the graphs
     date_ori = pd.to_datetime(df.index).tolist()
@@ -72,3 +72,53 @@ def future_date(df: pd.DataFrame):
         date_ori.append(date_ori[-1] + timedelta(days = 1))
     date_ori = pd.Series(date_ori).dt.strftime(date_format = '%Y-%m-%d').tolist()
     return date_ori
+
+def plot_label(future):
+
+    #get prepared data with calcs
+    df = pd.read_csv('data\\data.csv')
+    df.set_index('Date', inplace = True)
+    future = future['forecast']
+    df = pd.concat([df, future])
+
+    df["Close and pred"] = np.where(df["Close"].isna(),df[0],df["Close"]).astype("float")
+    df = df.drop(0,axis=1)
+    df = df.drop("Close",axis=1)
+    df = df.drop("std", axis=1)
+    df = df.drop("ema_trend", axis=1)
+    df = df.drop("trend", axis=1)
+    
+    df['std'] = df['Close and pred'].rolling(10).std()
+    df['std'] = np.where(df["std"].isna(),0,df["std"]).astype("float")
+
+    alpha = 0.55 #Historical percen up vs down
+    prev_close = np.array(df['Close and pred'].shift(1))
+    close = np.array(df['Close and pred'])
+    prev_std = np.array(df['std'].shift(1))
+    trend = []
+    for i in range(len(df)):
+
+        if close[i] > (prev_close[i] + (alpha*prev_std[i])):
+            trend.append(1) #Up
+        elif close[i] < (prev_close[i] - ((1-alpha)*prev_std[i])):
+            trend.append(0) #Down
+        else:
+            trend.append(0.5) #Range
+        
+    df['trend'] = trend
+    df['ema_trend'] = df['trend'].rolling(10).mean()
+    df['ema_trend'] = np.where(df["ema_trend"].isna(),0,df["ema_trend"]).astype("float")
+    df.to_csv('data\\data_pred.csv')
+
+    #Plotting the results
+    fig = plt.figure(figsize=(15,8))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.plot(df['trend'][-90:], color = 'green', label = 'trend')
+    ax.plot(df['ema_trend'][-90:], color = 'red', label = '10ema')
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    ax.set_title('Label plot')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('trend')
+    plt.legend()
+    fig.savefig('figures\\cnn_lstm_labelpred.png')
+    plt.show()
