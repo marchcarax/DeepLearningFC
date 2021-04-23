@@ -11,6 +11,7 @@ class data_process:
     def __init__(self, ticker, start_date, end_date):
         
         self.df = self.get_data(ticker, start_date, end_date)
+        self.date = self.df.index
         self.window = 60
         self.features = 6
         self.X, self.y, self.scx, self.scy = self.minmaxscale(self.df, self.window)
@@ -22,6 +23,7 @@ class data_process:
 
 
     def get_data(self, ticker, start_date, end_date):
+
         df = web.get_data_yahoo(ticker, start = start_date, end = end_date)
         df.drop('Adj Close', axis=1, inplace = True)
         df['std'] = df['Close'].rolling(10).std()
@@ -44,29 +46,31 @@ class data_process:
         
         df['trend'] = trend
         df['ema_trend'] = df['trend'].rolling(20).mean()
-        print(df.tail())
+        #print(df.tail())
         return df
 
     def minmaxscale(self, df, window):
+
         #Scaling data
         scx = MinMaxScaler(feature_range = (0, 1))
         scy = MinMaxScaler(feature_range = (0, 1))
-        dfv = df[['High', 'Low', 'Open', 'Volume', 'std', 'Close']].values
-        #dfv = df.iloc[:,1:6].values
-        df_scale = pd.DataFrame(scx.fit_transform(dfv))
+        
+        dfx = df[['High', 'Low', 'Open', 'Volume', 'std', 'Close']].values
+        dfy = df['Close'].values
+        df_scale = pd.DataFrame(scx.fit_transform(dfx))
         X = df_scale[[0,1,2,3,4,5]]
-        print(X.shape)
-        X_aux = []
+        y = np.array(scy.fit_transform(dfy.reshape(-1,1)))
 
+        X_aux = []
+        y_aux = []
         for i in range(window, len(X)-1):
             X_aux.append(X.iloc[i-window:i, :])
+            y_aux.append(y[i, 0])
 
-        X = np.array(X_aux)
-        print(X.shape)
+        X, y = np.array(X_aux), np.array(y_aux)
         X = np.reshape(X, (X.shape[0], X.shape[1], 6))
-        print(X.shape)
-        #y = np.array(df_scale[5])
-        y_close = df['Close'].values
-        y = np.array(scy.fit_transform(y_close.reshape(-1,1)))
+        print('x shape ', X.shape)
+        print('y shape ', y.shape)
+        
         return X, y, scx, scy
 
