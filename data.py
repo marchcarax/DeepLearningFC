@@ -18,6 +18,7 @@ class data_process:
         self.split = 30
         self.X_train = self.X[:-self.split-1, :, :]
         self.X_test = self.X[-self.split-1:, :, :]
+        self.X_fut = self.X[-20:, :, :]
         self.y_train = self.y[:-self.split-1]
         self.y_test = self.y[-self.split-1:]
 
@@ -27,7 +28,6 @@ class data_process:
         df = web.get_data_yahoo(ticker, start = start_date, end = end_date)
         df.drop('Adj Close', axis=1, inplace = True)
         df['std'] = df['Close'].rolling(10).std()
-        df['std'].fillna(0)
         df['std'] = np.where(df["std"].isna(),0,df["std"]).astype("float")
 
         alpha = 0.55 #Historical percen up vs down
@@ -39,14 +39,16 @@ class data_process:
 
             if close[i] > (prev_close[i] + (alpha*prev_std[i])):
                 trend.append(1) #Up
-            elif close[i] < (prev_close[i] - (alpha*prev_std[i])):
+            elif close[i] < (prev_close[i] - ((1-alpha)*prev_std[i])):
                 trend.append(0) #Down
             else:
                 trend.append(0.5) #Range
         
         df['trend'] = trend
-        df['ema_trend'] = df['trend'].rolling(20).mean()
-        #print(df.tail())
+        df['ema_trend'] = df['trend'].rolling(10).mean()
+        df['ema_trend'] = np.where(df["ema_trend"].isna(),0,df["ema_trend"]).astype("float")
+        df.to_csv('data\\data.csv')
+
         return df
 
     def minmaxscale(self, df, window):
@@ -55,7 +57,7 @@ class data_process:
         scx = MinMaxScaler(feature_range = (0, 1))
         scy = MinMaxScaler(feature_range = (0, 1))
         
-        dfx = df[['High', 'Low', 'Open', 'Volume', 'std', 'Close']].values
+        dfx = df[['High', 'Low', 'Open', 'Volume', 'std', 'ema_trend']].values
         dfy = df['Close'].values
         df_scale = pd.DataFrame(scx.fit_transform(dfx))
         X = df_scale[[0,1,2,3,4,5]]
