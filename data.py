@@ -14,13 +14,14 @@ class data_process:
         self.date = self.df.index
         self.window = 20 #timesteps that nn will look back
         self.features = 6
-        self.X, self.y, self.scx, self.scy = self.minmaxscale(self.df, self.window)
         self.split = 40 #train test split
-        self.X_train = self.X[:-self.split-1, :, :]
-        self.X_test = self.X[-self.split-1:, :, :]
-        self.X_fut = self.X[-self.window:, :, :]
-        self.y_train = self.y[:-self.split-1]
-        self.y_test = self.y[-self.split-1:]
+        self.futureSteps = 5
+        self.X, self.y, self.scx, self.scy = self.minmaxscale(self.df, self.window, self.futureSteps)
+        self.X_train = self.X[:-self.split, :, :]
+        self.X_test = self.X[-self.split:, :, :]
+        self.X_fut = self.X[-1:, :, :]
+        self.y_train = self.y[:-self.split]
+        self.y_test = self.y[-self.split:]
 
 
     def get_data(self, ticker, start_date, end_date):
@@ -51,7 +52,7 @@ class data_process:
 
         return df
 
-    def minmaxscale(self, df, window):
+    def minmaxscale(self, df, window, futureSteps):
 
         #Scaling data
         scx = MinMaxScaler(feature_range = (0, 1))
@@ -65,9 +66,9 @@ class data_process:
 
         X_aux = []
         y_aux = []
-        for i in range(window, len(X)-1):
+        for i in range(window, len(X)-futureSteps,1):
             X_aux.append(X.iloc[i-window:i, :])
-            y_aux.append(y[i, 0])
+            y_aux.append(y[i: i + futureSteps, 0])
 
         X, y = np.array(X_aux), np.array(y_aux)
         X = np.reshape(X, (X.shape[0], X.shape[1], 6))
