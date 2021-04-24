@@ -51,13 +51,13 @@ class model():
         return y_pred
 
     def forecast(self, Model, X_fut):
-        
         #Creates prediction given a pred_len
+        #ALL BAD RE-DO
         print('x shape in forecast model ', X_fut.shape)
         pred_seq = []
         pred_len = 5
         predicted = []
-        current = X_fut[len(X_fut)-2]
+        current = X_fut[len(X_fut)-1]
 
         for i in range(0, pred_len):
             predicted.append(Model.predict(current[None, :, :])[0,0])
