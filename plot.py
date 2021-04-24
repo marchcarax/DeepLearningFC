@@ -60,7 +60,7 @@ def plot_future(future, n):
     ax.set_xlabel('Time')
     ax.set_ylabel('Price')
     plt.legend()
-    fig.savefig('figures\\cnn_lstm_train_test.png')
+    fig.savefig('figures\\cnn_lstm_pred.png')
     plt.show()
 
     return df_predict[-n:]
