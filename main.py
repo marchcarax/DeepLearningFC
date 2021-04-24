@@ -32,8 +32,11 @@ def main():
         create a simulation of 5 possible FC . It would need to be trained 5 times to work...it takes toomuch time --> NO
         add ci in test plot --> NO, not worth it
         label prediction with custom indicator with np.where =1 UP, =0 DOWN, or range --> DONE
-        NOT WORKING WELL THE FC WHYYYYYYYYY
+
+        NOT WORKING WELL THE FC WHYYYYYYYYY --> USE WHAT YOU LEARNED IN SAVED PAGE
+        change input data and output y data to be next day close! you are predicting after all
         do the label pred with full trained and pred data!! not close!
+        add ci in test plot based on % from pred price
 
         future:
         new mix in layers
