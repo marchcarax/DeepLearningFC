@@ -12,11 +12,11 @@ def main():
     lstm_model = model(data)
     
     y_test = data.y_test
-    y_test = data.scy.inverse_transform(y_test.reshape(-1,1))
-    res = data.scy.inverse_transform(lstm_model.results)
+    y_test = data.scy.inverse_transform(y_test).T
+    res = data.scy.inverse_transform(lstm_model.results).T
     forecast = data.scy.inverse_transform(lstm_model.future)
 
-    plot.plot_test(data.date, data.split, y_test, res)
+    plot.plot_test(data.date, data.split, y_test[1], res[1])
     df_predict = plot.plot_future(forecast, 5)
     plot.plot_label(df_predict)
 
@@ -33,7 +33,7 @@ def main():
         add ci in test plot --> NO, not worth it
         label prediction with custom indicator with np.where =1 UP, =0 DOWN, or range --> DONE
 
-        NOT WORKING WELL THE FC WHYYYYYYYYY --> USE WHAT YOU LEARNED IN SAVED PAGE
+        NOT WORKING WELL THE FC WHYYYYYYYYY --> USE WHAT YOU LEARNED IN SAVED PAGE --> DONE :D
         change input data and output y data to be next day close! you are predicting after all
         do the label pred with full trained and pred data!! not close!
         add ci in test plot based on % from pred price
