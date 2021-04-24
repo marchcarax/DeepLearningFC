@@ -14,7 +14,7 @@ def plot_test(date, test_size, y_test, results):
     print('Mean square error between train model and test data is: %.2f'%(rmse))
 
     df = pd.DataFrame()
-    df['Date'] = date[-test_size-1:]
+    df['Date'] = date[-test_size:]
     df.set_index('Date', inplace = True)
     df['predict'] = results
     df['real'] = y_test
@@ -115,7 +115,7 @@ def plot_label(future):
     ax = fig.add_axes([0.1,0.1,0.8,0.8])
     ax.plot(df['trend'][-90:], color = 'green', label = 'trend')
     ax.plot(df['ema_trend'][-90:], color = 'red', label = '10ema')
-    ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
     ax.set_title('Label plot')
     ax.set_xlabel('Time')
     ax.set_ylabel('trend')
