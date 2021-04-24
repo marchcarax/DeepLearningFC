@@ -1,6 +1,5 @@
 #trying a mix of cnn + lstm timeseries model
 
-# Import TensorFlow v2.
 import tensorflow as tf
 from tensorflow.keras import Model, layers
 import pandas as pd
@@ -12,12 +11,12 @@ class model():
     def __init__(self, data_process):
         
         self.data = data_process
-        self.lstm_model = self.Mix_LSTM_Model(self.data.window, self.data.features)
+        self.lstm_model = self.Mix_LSTM_Model(self.data.window, self.data.features, self.data.futureSteps)
         self.lstm_fit = self.fit_model(self.lstm_model, self.data.X_train, self.data.y_train)
         self.results = self.pred(self.lstm_fit, self.data.X_test)
         self.future = self.forecast(self.lstm_fit , self.data.X_fut)
 
-    def Mix_LSTM_Model(self, window, features):
+    def Mix_LSTM_Model(self, window, features, futureSteps):
 
         model = tf.keras.Sequential()
         model.add(layers.Conv1D(input_shape=(window, features), filters=32,
@@ -29,7 +28,8 @@ class model():
         model.add(layers.LSTM(250,  return_sequences=False))
         model.add(layers.Dropout(0.2))
         model.add(layers.Dense(100, kernel_initializer='uniform', activation='relu'))
-        model.add(layers.Dense(1, kernel_initializer='uniform', activation='relu'))
+        #Instead of the usual 1 unit in Dense, we use futureSteps to predict later n days
+        model.add(layers.Dense(units = futureSteps, kernel_initializer='uniform', activation='relu'))
 
         model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
@@ -51,21 +51,11 @@ class model():
         return y_pred
 
     def forecast(self, Model, X_fut):
-        #Creates prediction given a pred_len
-        #ALL BAD RE-DO
-        print('x shape in forecast model ', X_fut.shape)
-        pred_seq = []
-        pred_len = 5
-        predicted = []
-        current = X_fut[len(X_fut)-1]
 
-        for i in range(0, pred_len):
-            predicted.append(Model.predict(current[None, :, :])[0,0])
-            current = current[1:]
-            #adds the new element (predicted value) at the end of the array
-            current = np.insert(current, len(current), predicted[-1], axis=0)
+        #I think finally have last 20 days in x_fut, follow now the steps
+        print('x shape of the future: ', X_fut.shape)
+        y_fut = Model.predict(X_fut)
+        print('y shape of the future: ', y_fut.shape)
 
-        pred_seq.append(predicted)
-
-        return pred_seq
+        return y_fut
 
