@@ -12,13 +12,13 @@ class data_process:
         
         self.df = self.get_data(ticker, start_date, end_date)
         self.date = self.df.index
-        self.window = 60
+        self.window = 20 #timesteps that nn will look back
         self.features = 6
         self.X, self.y, self.scx, self.scy = self.minmaxscale(self.df, self.window)
-        self.split = 30
+        self.split = 40 #train test split
         self.X_train = self.X[:-self.split-1, :, :]
         self.X_test = self.X[-self.split-1:, :, :]
-        self.X_fut = self.X[-20:, :, :]
+        self.X_fut = self.X[-self.window:, :, :]
         self.y_train = self.y[:-self.split-1]
         self.y_test = self.y[-self.split-1:]
 
