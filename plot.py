@@ -9,14 +9,21 @@ import seaborn as sns
 
 def plot_test(date, test_size, y_test, results):
     
-    #Model error
-    rmse = sqrt(mean_squared_error(y_test, results))
-    print('Mean square error between train model and test data is: %.2f'%(rmse))
+    #Model error to decide best predictions
+    best_result = []
+    best_rmse = 100 
+    for i in range(len(results)):
+        rmse = sqrt(mean_squared_error(y_test, results[i]))
+        print('Simulation:', i)
+        print('Mean square error between train model and test data is: %.2f'%(rmse))
+        if rmse < best_rmse:
+            best_result = results[i]
+            best_rmse = rmse
 
     df = pd.DataFrame()
     df['Date'] = date[-test_size:]
     df.set_index('Date', inplace = True)
-    df['predict'] = results
+    df['predict'] = best_result
     df['real'] = y_test
     df.to_csv('data\\train_test_data.csv')
 
@@ -47,7 +54,7 @@ def plot_future(future, n):
     df_predict["forecast"] = np.where(df_predict["predict"].isna(),df_predict["future"],df_predict["predict"]).astype("float")
     df_predict = df_predict.drop("predict",axis=1)
     df_predict = df_predict.drop("future",axis=1)
-    print(df_predict)
+    #print(df_predict)
 
     #Plotting the results
     fig = plt.figure(figsize=(15,8))
@@ -115,7 +122,7 @@ def plot_label(future):
     ax = fig.add_axes([0.1,0.1,0.8,0.8])
     ax.plot(df['trend'][-90:], color = 'green', label = 'trend')
     ax.plot(df['ema_trend'][-90:], color = 'red', label = '10ema')
-    ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
     ax.set_title('Label plot')
     ax.set_xlabel('Time')
     ax.set_ylabel('trend')
