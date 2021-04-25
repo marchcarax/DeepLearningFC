@@ -39,7 +39,7 @@ class model():
 
         print('x shape in fit model ', X_train.shape)
         print('y shape in fit model ', y_train.shape)
-        Model.fit(X_train, y_train, epochs = 10)
+        Model.fit(X_train, y_train, epochs = 100)
         Model.summary()
 
         return Model
