@@ -71,6 +71,7 @@ class data_process:
             y_aux.append(y[i: i + futureSteps, 0])
 
         X, y = np.array(X_aux), np.array(y_aux)
+        #Creates the 3D array for the neural nettwork, remember to change the features if needed
         X = np.reshape(X, (X.shape[0], X.shape[1], 6))
         print('x shape ', X.shape)
         print('y shape ', y.shape)
