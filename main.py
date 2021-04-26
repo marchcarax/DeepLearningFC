@@ -6,7 +6,7 @@ def main():
     
     #Send data to analyze and predict
     start_date = "2018-01-01"
-    end_date = "2022-04-21"
+    end_date = "2022-04-23"
     stock = 'FB'
     data = data_process(stock, start_date, end_date)
     lstm_model = model(data)
