@@ -120,9 +120,11 @@ def plot_label(future):
     #Plotting the results
     fig = plt.figure(figsize=(15,8))
     ax = fig.add_axes([0.1,0.1,0.8,0.8])
-    ax.plot(df['trend'][-90:], color = 'green', label = 'trend')
+    ax.plot(df['trend'][-90:], color = 'green', label = 'trend', alpha=0.2)
     ax.plot(df['ema_trend'][-90:], color = 'red', label = '10ema')
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=10))
+    ax.axhline(y = 0.35, color = 'b', linestyle = '--')
+    ax.axhline(y = 0.65, color = 'b', linestyle = '--')
     ax.set_title('Label plot')
     ax.set_xlabel('Time')
     ax.set_ylabel('trend')
