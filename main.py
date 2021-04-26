@@ -1,5 +1,5 @@
 from cnn_lstm_model import model
-from data import data_process
+from data import data_process #change the data version to run
 import plot
 
 def main():
